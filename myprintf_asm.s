@@ -262,9 +262,18 @@ copy2Buffer:
 
 printNumBase2n:
 
-            inc rbx
+            inc rbx                 ; arument counter +1
 
             mov rdx, [rbp + 16 + 8 * rbx]
+
+            call countBytes
+            
+            add rdi, rax
+
+            mov byte [rdi], EOL
+            dec rdi
+
+            push rax
 
             mov r8, 01b
             shl r8, cl
@@ -289,11 +298,17 @@ printNumBase2n:
 
             mov al, [hexTable + rax]  
             mov [rdi], al
-            inc di
+            dec di
 
             test edx, edx
 
             jne .loop
+
+            pop rax
+
+            add rdi, rax
+
+            inc rdi
 
             ret
 
@@ -302,6 +317,14 @@ printNumBase10:
             inc rbx
 
             mov rdx, [rbp + 16 + 8 * rbx]
+
+            call countBytes
+
+            add rdi, rax
+
+            mov byte [rdi], EOL
+
+            push rax
 
             push rbx               ; save rbx
 
@@ -312,7 +335,6 @@ printNumBase10:
 
             test edx, edx           ; check for signed
             jns .loop
-    
 
             mov al, '-'             ; '-' symbol
             stosb
@@ -329,7 +351,7 @@ printNumBase10:
 
             add dl, '0'
             mov [rdi], dl
-            inc rdi
+            dec rdi
 
             test eax, eax
 
@@ -337,16 +359,42 @@ printNumBase10:
 
             pop rbx
 
+            pop rax
+
+            add rdi, rax
+
+            inc rdi
+            inc rdi
+
             ret
+
+; rdx - value, cl - base, result - ch
+
+countBytes:
+
+            xor rax, rax
+            xor ch, ch
+            mov rax, rdx
+
+.loop:
+            inc ch
+            shr rax, cl
+
+            test rax, rax
+            jne .loop
+
+            xor rax, rax
+
+            mov al, ch
+
+            ret
+
 
 flushBuffer:
             push rsi
             push rdx
 
-            mov al, 0xa             ; '\n' or else it will output '%'
-            mov [rdi], al
-
-            sub rdi, buffer - 1     ; '\n' is added
+            sub rdi, buffer     ; '\n' is added
             mov rdx, rdi
 
             mov rax, 0x01           ; syscall write ()
