@@ -71,6 +71,8 @@ myPrintfC:
 ;            | return address | <- rbp + 8
 ;            | saved rbp      | <- rbp
 ;
+; [Save]:    rsi, rdi, rbx, rbp 
+;
 ;-------------------------------------------------------------------------------
 
 ;-----start of myPrintf label---------------------------------------------------
@@ -234,16 +236,7 @@ myPrintf:
 
 .end:
 
-            mov al, 0xa             ; '\n' or else it will output '%'
-            mov [rdi], al
-
-            sub rdi, buffer - 1     ; '\n' is added
-            mov rdx, rdi
-
-            mov rax, 0x01           ; syscall write ()
-            mov rdi, 1
-            mov rsi, buffer
-            syscall
+            call flushBuffer
 
             xor rax, rax            ; rdi - return value 0
             ret
@@ -295,7 +288,8 @@ printNumBase2n:
             shr edx, cl
 
             mov al, [hexTable + rax]  
-            stosb
+            mov [rdi], al
+            inc di
 
             test edx, edx
 
@@ -309,7 +303,7 @@ printNumBase10:
 
             mov rdx, [rbp + 16 + 8 * rbx]
 
-            push rbx               ; !!!
+            push rbx               ; save rbx
 
 .isNegative:
 
@@ -345,4 +339,27 @@ printNumBase10:
 
             ret
 
+flushBuffer:
+            push rsi
+            push rdx
+
+            mov al, 0xa             ; '\n' or else it will output '%'
+            mov [rdi], al
+
+            sub rdi, buffer - 1     ; '\n' is added
+            mov rdx, rdi
+
+            mov rax, 0x01           ; syscall write ()
+            mov rdi, 1
+            mov rsi, buffer
+            syscall
+
+            pop rdx
+            pop rsi
+
+            mov rdi, buffer         ; set buffer
+
+            ret
+
+    
 ; TODO: check for overflow, flushbuf, reverse strings
