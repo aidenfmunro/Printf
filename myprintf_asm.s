@@ -8,6 +8,10 @@ section .bss
 
 buffer      resb BUFFER_LEN
 
+section .data
+
+hexTable    db '0123456789ABCDEF'
+
 section .text
 
 ;-------------------------------------------------------------------------------
@@ -187,14 +191,14 @@ myPrintf:
 ;-----End of case 'd'-----------------------------------------------------------
 
             mov cl, 0
-            jmp
+            ; jmp
 
 ;-----Start of case 'b'---------------------------------------------------------
 
 .symbolB:
 
             mov cl, 1
-            jmp 
+            jmp .printNum 
 
 ;-----End of case 'b'-----------------------------------------------------------
 
@@ -203,7 +207,7 @@ myPrintf:
 .symbolO:
 
             mov cl, 3
-            jmp
+            jmp .printNum
 
 ;-----End of case 'o'-----------------------------------------------------------
 
@@ -212,14 +216,44 @@ myPrintf:
 .symbolX:
 
             mov cl, 4
-            jmp  
+            jmp .printNum 
 
 ;-----End of case 'x'-----------------------------------------------------------
 
 .printNum:
 
             inc rbx 
-            mov rdx, [rbp + 16 + 8 * rbx]       ; value 
+            mov rdx, [rbp + 16 + 8 * rbx]       ; value
+
+            mov r8, 01b
+            shl r8, cl
+            dec r8
+
+.isNegative:
+
+            test rdx, rdx           ; check for signed
+            jns .bLoop           
+
+            mov al, 0x2D            ; '-' symbol
+            stosb                   
+
+            neg rdx                 ; make unsigned
+
+.bLoop:
+
+            mov rax, r8
+            and rax, rdx
+
+            shr rdx, cl
+
+            mov al, [hexTable + rax]  
+            stosb
+
+            cmp rdx, 0
+
+            jne .bLoop
+
+            jmp .mainLoop
 
 .differentSymbol:
 
@@ -250,4 +284,4 @@ myPrintf:
             xor rax, rax            ; rdi - return value 0
             ret
 
-; TODO: check for overflow
+; TODO: check for overflow, flushbuf
