@@ -2,7 +2,7 @@ extern int myPrintfC (char* format, ...);
 
 int main (void)
 {
-    myPrintfC ("Hello!");
+    myPrintfC ("Hello!, %c s", 'x');
 
     return 0;
 }
