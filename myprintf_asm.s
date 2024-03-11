@@ -2,6 +2,8 @@
 EOL equ 00
 BUFFER_LEN equ 256
 
+global myPrintfC
+
 section .bss
 
 buffer      resb BUFFER_LEN
@@ -129,15 +131,15 @@ myPrintf:
             dq .symbolC             ; case 'c'
             dq .symbolD             ; case 'd'
 
-            times ('n' - 'd') dq .differentSymbol
-
-            dq .symbolO             ; case 'o'
-
-            times ('r' - 'o') dq .differentSymbol
-
-            dq .symbolS             ; case 's'
-
-            times ('w' - 's') dq .differentSymbol
+            times ('n' - 'd') dq .differentSymbol           
+                                                            
+            dq .symbolO             ; case 'o'              
+                                                             
+            times ('r' - 'o') dq .differentSymbol           
+                                                            
+            dq .symbolS             ; case 's'              
+                                                            
+            times ('w' - 's') dq .differentSymbol           
 
             dq .symbolX             ; case 'x'
 
@@ -194,5 +196,11 @@ myPrintf:
 
 
 .end:
+            mov rax, 0x01              ; syscall write ()
+            mov rdi, 1
+            mov rsi, buffer
+            mov rdx, 7
+            syscall
+            
             xor rax, rax            ; return value 0
             ret
