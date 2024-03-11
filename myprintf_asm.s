@@ -166,17 +166,13 @@ myPrintf:
 
 .symbolS:
 
-            push rsi                ; save rsi
             inc rbx
+
+            push rsi                ; save rsi
 
             mov rsi, [rbp + 16 + 8 * rbx]
 
-.sLoop:
-            movsb
-
-            cmp BYTE [rsi], EOL     ; compare with end symbol
-
-            jne .sLoop      
+            call copy2Buffer
 
             pop rsi                 ; get rsi
 
@@ -190,15 +186,16 @@ myPrintf:
 
 ;-----End of case 'd'-----------------------------------------------------------
 
-            mov cl, 0
-            ; jmp
+            call printNumBase10
+            jmp .mainLoop
 
 ;-----Start of case 'b'---------------------------------------------------------
 
 .symbolB:
 
             mov cl, 1
-            jmp .printNum 
+            call printNumBase2n
+            jmp .mainLoop 
 
 ;-----End of case 'b'-----------------------------------------------------------
 
@@ -207,7 +204,8 @@ myPrintf:
 .symbolO:
 
             mov cl, 3
-            jmp .printNum
+            call printNumBase2n
+            jmp .mainLoop
 
 ;-----End of case 'o'-----------------------------------------------------------
 
@@ -216,44 +214,10 @@ myPrintf:
 .symbolX:
 
             mov cl, 4
-            jmp .printNum 
+            call printNumBase2n
+            jmp .mainLoop 
 
 ;-----End of case 'x'-----------------------------------------------------------
-
-.printNum:
-
-            inc rbx 
-            mov rdx, [rbp + 16 + 8 * rbx]       ; value
-
-            mov r8, 01b
-            shl r8, cl
-            dec r8
-
-.isNegative:
-
-            test rdx, rdx           ; check for signed
-            jns .bLoop           
-
-            mov al, 0x2D            ; '-' symbol
-            stosb                   
-
-            neg rdx                 ; make unsigned
-
-.bLoop:
-
-            mov rax, r8
-            and rax, rdx
-
-            shr rdx, cl
-
-            mov al, [hexTable + rax]  
-            stosb
-
-            cmp rdx, 0
-
-            jne .bLoop
-
-            jmp .mainLoop
 
 .differentSymbol:
 
@@ -284,4 +248,101 @@ myPrintf:
             xor rax, rax            ; rdi - return value 0
             ret
 
-; TODO: check for overflow, flushbuf
+copy2Buffer:
+
+.copyByte:
+
+            ; check for ow
+
+            lodsb
+            cmp al, EOL
+
+            je .end
+
+            stosb
+
+            jmp .copyByte
+
+.end:
+
+            ret
+
+printNumBase2n:
+
+            inc rbx
+
+            mov rdx, [rbp + 16 + 8 * rbx]
+
+            mov r8, 01b
+            shl r8, cl
+            dec r8
+
+.isNegative:
+
+            test edx, edx
+            jns .loop
+            
+            mov al, '-'
+            stosb
+
+            neg edx
+
+.loop:
+
+            mov rax, r8
+            and rax, rdx
+
+            shr edx, cl
+
+            mov al, [hexTable + rax]  
+            stosb
+
+            test edx, edx
+
+            jne .loop
+
+            ret
+
+printNumBase10:
+
+            inc rbx
+
+            mov rdx, [rbp + 16 + 8 * rbx]
+
+            push rbx               ; !!!
+
+.isNegative:
+
+            mov ebx, 10 
+            mov eax, edx
+
+            test edx, edx           ; check for signed
+            jns .loop
+    
+
+            mov al, '-'             ; '-' symbol
+            stosb
+
+            mov eax, edx                  
+
+            neg eax                 ; make unsigned
+
+
+.loop:
+
+            xor edx, edx            ; clean rdx 
+            div ebx
+
+            add dl, '0'
+            mov [rdi], dl
+            inc rdi
+
+            test eax, eax
+
+            jne .loop
+
+            pop rbx
+
+            ret
+
+; TODO: check for overflow, flushbuf, reverse strings

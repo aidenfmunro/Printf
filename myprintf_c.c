@@ -2,7 +2,9 @@ extern int myPrintfC (char* format, ...);
 
 int main (void)
 {
-    myPrintfC ("binary number: %b, %o, %x", 11, 11, 11);
 
-    return 0;
+    int res = myPrintfC ("%o\n%d %s %x %d%%%c%b\n%d %s %x %d%%%c%b\n", -1, -1, "love", 3802, 100, 33, 127,
+                                                                           -1, "love", 3802, 100, 33, 127);
+
+    return res;
 }
