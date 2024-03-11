@@ -77,7 +77,7 @@ myPrintf:
 
             mov rbx, 0              ; argument counter
 
-.loop:
+.mainLoop:
             xor rax, rax            ; clean rax
 
             lodsb
@@ -95,7 +95,7 @@ myPrintf:
 
             ; add check for buffer overflow!
 
-            jmp .loop               ; proceed to next char
+            jmp .mainLoop           ; proceed to next char
 
 .conversionSpecifier:
 
@@ -173,6 +173,25 @@ myPrintf:
 
 .symbolS:
 
+            push rsi                ; save rsi
+            inc rbx
+
+            mov rsi, [rbp + 16 + 8 * rbx]
+
+.sLoop:
+            movsb
+
+            cmp BYTE [rsi], EOL     ; compare with end symbol
+
+            jne .sLoop      
+
+            pop rsi                 ; get rsi
+
+            jmp .mainLoop
+
+
+
+
 ;-----End of case 's'-----------------------------------------------------------
 
 ;-----Start of case 'x'---------------------------------------------------------
@@ -186,21 +205,28 @@ myPrintf:
             mov byte [rdi], '%'
             inc rdi
 
-            jmp .loop
+            jmp .mainLoop
 
 .symbolPercent:
 
             stosb
 
-            jmp .loop
-
+            jmp .mainLoop
 
 .end:
-            mov rax, 0x01              ; syscall write ()
+
+            mov al, 0xa             ; '\n' or else it will output '%'
+            mov [rdi], al
+
+            sub rdi, buffer - 1     ; '\n' is added
+            mov rdx, rdi
+
+            mov rax, 0x01           ; syscall write ()
             mov rdi, 1
             mov rsi, buffer
-            mov rdx, 7
             syscall
-            
-            xor rax, rax            ; return value 0
+
+            xor rax, rax            ; rdi - return value 0
             ret
+
+; TODO: check for overflow
