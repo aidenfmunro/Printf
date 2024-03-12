@@ -316,37 +316,39 @@ printNumBase10:
 
             inc rbx
 
-            mov rdx, [rbp + 16 + 8 * rbx]
-
-            call countBytes
-
-            add rdi, rax
-
-            mov byte [rdi], EOL
-
-            push rax
+            mov r8, [rbp + 16 + 8 * rbx]
 
             push rbx               ; save rbx
 
-.isNegative:
-
             mov ebx, 10 
-            mov eax, edx
+            mov rax, r8
+            xor ch, ch              ; for count bytes
 
-            test edx, edx           ; check for signed
-            jns .loop
+.countBytes:
+            
+            inc ch
+            div ebx
 
-            mov al, '-'             ; '-' symbol
-            stosb
+            ;add dl, '0'
+            ;mov [rdi], dl
+            ;dec rdi
 
-            mov eax, edx                  
+            test eax, eax
 
-            neg eax                 ; make unsigned
+            jne .countBytes
 
+            xor rax, rax
+            mov al, ch
+
+            push rax
+
+            add rdi, rax
+
+            mov rax, r8
 
 .loop:
 
-            xor edx, edx            ; clean rdx 
+            xor edx, edx
             div ebx
 
             add dl, '0'
@@ -354,16 +356,14 @@ printNumBase10:
             dec rdi
 
             test eax, eax
-
             jne .loop
-
-            pop rbx
 
             pop rax
 
+            pop rbx
+
             add rdi, rax
 
-            inc rdi
             inc rdi
 
             ret
@@ -410,4 +410,4 @@ flushBuffer:
             ret
 
     
-; TODO: check for overflow, flushbuf, reverse strings
+; TODO: check for overflow, flushbuf, reverse strings, print -
