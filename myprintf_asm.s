@@ -241,6 +241,8 @@ myPrintf:
             xor rax, rax            ; rdi - return value 0
             ret
 
+;-----End of myPrintf label-----------------------------------------------------
+
 copy2Buffer:
 
 .copyByte:
@@ -259,6 +261,27 @@ copy2Buffer:
 .end:
 
             ret
+
+;-------------------------------------------------------------------------------
+;
+; [Brief]: Print number of base 2^n (n = 1, 3, 4)
+;
+; [Expects]: rdi - format string,
+;            rbx - argument count
+;             cl - base
+;
+; [Sets]:
+;            r8  - bit mask
+;            rdx - value 
+;           
+;           
+; [Destroy]: rax, rdx, rcx
+;
+; [Save]:    rsi, rdi, rbx, rbp 
+;
+;-------------------------------------------------------------------------------
+
+;-----Start of printNumBase2n label---------------------------------------------
 
 printNumBase2n:
 
@@ -313,6 +336,29 @@ printNumBase2n:
             inc rdi
 
             ret
+
+;-----End of printNumBase2n label-----------------------------------------------
+
+;-------------------------------------------------------------------------------
+;
+; [Brief]: Print number of base 10
+;
+; [Expects]: rdi - format string,
+;            rbx - argument count
+;
+; [Sets]:
+;            r8 - value
+;            r9 - counts bytes need to print
+;            r10 - quotient
+;           
+;           
+; [Destroy]: rax, rdx
+;
+; [Save]:    rsi, rdi, rbx, rbp 
+;
+;-------------------------------------------------------------------------------
+
+;-----Start of printNumBase10 label---------------------------------------------
 
 printNumBase10:
 
@@ -369,7 +415,30 @@ printNumBase10:
 
             ret
 
-; rdx - value, cl - base, result - ch
+;-----End of printNumBase10 label-----------------------------------------------
+
+;-------------------------------------------------------------------------------
+;
+; [Brief]: Count bytes need to print for a number of base 2^n (n = 1, 3, 4)
+;
+; [Expects]: rdx - value,
+;            cl - base
+;
+; [Sets]:
+;            r8 - value
+;            r9 - counts bytes need to print
+;            r10 - quotient
+;           
+;           
+; [Destroy]: rax, rdx
+;
+; [Return];  ch - amount of bytes needed
+;
+; [Save]:    rsi, rdi, rbx, rbp 
+;
+;-------------------------------------------------------------------------------
+
+;-----Start of countBytes label-------------------------------------------------
 
 countBytes:
 
@@ -390,12 +459,31 @@ countBytes:
 
             ret
 
+;-----End of countBytes label----------------------------------------------------
+
+;-------------------------------------------------------------------------------
+;
+; [Brief]: Flushes the buffer
+;
+; [Expects]: rdi - address of last byte needed to be printed,
+;            
+;
+; [Sets]:
+;            rdi - back to the begining
+;           
+; [Destroy]: rax
+;
+; [Save]:    rsi, rdx
+;
+;-------------------------------------------------------------------------------
+
+;-----Start of flushBuffer label------------------------------------------------
 
 flushBuffer:
             push rsi
             push rdx
 
-            sub rdi, buffer     ; '\n' is added
+            sub rdi, buffer         
             mov rdx, rdi
 
             mov rax, 0x01           ; syscall write ()
@@ -410,5 +498,6 @@ flushBuffer:
 
             ret
 
+;-----End of flushBuffer lable--------------------------------------------------
     
-; TODO: check for overflow, flushbuf, reverse strings, print -
+; TODO: check for overflow
