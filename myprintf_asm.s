@@ -266,9 +266,21 @@ printNumBase2n:
 
             mov rdx, [rbp + 16 + 8 * rbx]
 
+.isNegative:
+
+            test edx, edx
+            jns .continue
+            
+            mov al, '-'
+            stosb
+
+            neg edx
+
+.continue:
+
             call countBytes
             
-            add rdi, rax
+            add rdi, rax    
 
             mov byte [rdi], EOL
             dec rdi
@@ -278,16 +290,6 @@ printNumBase2n:
             mov r8, 01b
             shl r8, cl
             dec r8
-
-.isNegative:
-
-            test edx, edx
-            jns .loop
-            
-            mov al, '-'
-            stosb
-
-            neg edx
 
 .loop:
 
@@ -318,51 +320,50 @@ printNumBase10:
 
             mov r8, [rbp + 16 + 8 * rbx]
 
-            push rbx               ; save rbx
+.isNegaitve:
+            mov rdx, r8
+            
+            test edx, edx
+            jns .continue
 
-            mov ebx, 10 
+            mov al, '-'
+            stosb
+
+            neg edx
+            mov r8, rdx
+.continue:
+
+            mov r10, 10 
             mov rax, r8
-            xor ch, ch              ; for count bytes
+            xor r9, r9              ; for count bytes
 
 .countBytes:
             
-            inc ch
-            div ebx
-
-            ;add dl, '0'
-            ;mov [rdi], dl
-            ;dec rdi
+            xor rdx, rdx
+            inc r9
+            div r10
 
             test eax, eax
 
             jne .countBytes
 
-            xor rax, rax
-            mov al, ch
-
-            push rax
-
-            add rdi, rax
+            add rdi, r9
 
             mov rax, r8
 
 .loop:
-
-            xor edx, edx
-            div ebx
+            xor rdx, rdx
+            div r10
 
             add dl, '0'
             mov [rdi], dl
             dec rdi
 
             test eax, eax
+
             jne .loop
 
-            pop rax
-
-            pop rbx
-
-            add rdi, rax
+            add rdi, r9
 
             inc rdi
 
