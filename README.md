@@ -5,6 +5,7 @@ Printf (C) function implemented in x86 NASM Assembly for Linux
 ## Functionality
 
 Support of theese format specifiers:
+
 ```
     %d: Signed decimal integers
     %s: String
@@ -12,7 +13,6 @@ Support of theese format specifiers:
     %b: Signed binary integers
     %o: Signed octal integers
     %x: Signed hex integers
-
 ```
 
 ## Example
