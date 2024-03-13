@@ -7,6 +7,16 @@ section .bss
 
 buffer      resb BUFFER_LEN
 
+%macro overflowCheck 0
+
+        cmp rdi, buffer + BUFFER_LEN - 64 - 1
+        jb %%noFlush
+
+        call flushBuffer
+%%noFlush:
+
+%endmacro
+
 section .data
 
 hexTable    db '0123456789ABCDEF'
@@ -155,6 +165,8 @@ myPrintf:
 .symbolC:
             inc rbx
 
+            overflowCheck
+
             mov al, [rbp + 16 + 8 * rbx]
 
             stosb
@@ -263,7 +275,7 @@ copy2Buffer:
 
 .copyByte:
 
-            ; check for ow
+            overflowCheck
 
             lodsb
             cmp al, EOL
@@ -312,6 +324,8 @@ printNumBase2n:
             test edx, edx
             jns .continue
             
+            overflowCheck
+
             mov al, '-'
             stosb
 
@@ -333,6 +347,8 @@ printNumBase2n:
             dec r8
 
 .loop:
+
+            overflowCheck
 
             mov rax, r8
             and rax, rdx
@@ -402,7 +418,7 @@ printNumBase10:
             xor r9, r9              ; for count bytes
 
 .countBytes:
-            
+
             xor rdx, rdx
             inc r9
             div r10
@@ -416,6 +432,8 @@ printNumBase10:
             mov rax, r8
 
 .loop:
+            overflowCheck
+
             xor rdx, rdx
             div r10
 
