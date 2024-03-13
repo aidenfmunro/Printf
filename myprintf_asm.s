@@ -1,11 +1,13 @@
-EOL        equ 00
-BUFFER_LEN equ 256
-
 global myPrintfC
 
-section .bss
+;-----Start of constants--------------------------------------------------------
 
-buffer      resb BUFFER_LEN
+EOL        equ 00
+BUFFER_LEN equ 264
+
+;-----End of constants----------------------------------------------------------
+
+;----Start of overflowCheck macro-----------------------------------------------
 
 %macro overflowCheck 0
 
@@ -16,6 +18,12 @@ buffer      resb BUFFER_LEN
 %%noFlush:
 
 %endmacro
+
+;-----End of overflowCheck macro------------------------------------------------
+
+section .bss
+
+buffer      resb BUFFER_LEN
 
 section .data
 

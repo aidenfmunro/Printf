@@ -1,26 +1,32 @@
-extern int myPrintfC (char* format, ...);
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-int main (void)
+extern int myPrintfC(const char* fmt, ...);
+
+void perfFuncPrintf(size_t sampleSize)
 {
+    const char* fmt = "%d%d%d%d%d\n";
 
-    // int res = myPrintfC ("%o\n%d %s %x %d%%%c%b\n%d %s %x %d%%%c%b\n", -1, -1, "love", 380123, 100, 33, 123,
-    //                                                                        -1, "love", 380123, 100, 33, 123);
+    for (size_t i = 0; i < sampleSize; i++)
+        printf(fmt, i, i, i, i, i);
+}
 
-    char* string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-    int res = myPrintfC ("%s %d\n %b %% %d %x", string, 100, -100, 100, -100);
-    return res;
+void perfFuncMyPrintf(size_t sampleSize)
+{
+    const char* fmt = "%d%d%d%d%d\n";
+
+    for (size_t i = 0; i < sampleSize; i++)
+        myPrintfC(fmt, i, i, i, i, i);
+}
+
+int main()
+{
+    size_t sampleSize = 1000000;
+
+    perfFuncPrintf(sampleSize);
+    perfFuncMyPrintf(sampleSize);
+
+    return 0;
 }

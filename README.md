@@ -24,8 +24,14 @@ int main (void)
 
     return 0;
 }
-
 ```
+
+## Performance check
+
+![screenshot](img/perftest.png)
+
+> **4x boost**
+
 ## Dependencies
 
 ```
