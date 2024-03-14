@@ -137,7 +137,8 @@ myPrintf:
 
             sub al, 'b'             ; get address number
 
-            mov rax, [.formatSpecifiers + rax * 8]
+            mov rax, [.formatSpecifiers + rax * 8]    ; TODO: rax - 'b' instead of two commands
+
             jmp rax                 ; jump
 
 ;-------------------------------------------------------------------------------
@@ -150,21 +151,21 @@ myPrintf:
 
 .formatSpecifiers:
 
-            dq .symbolB             ; case 'b'
-            dq .symbolC             ; case 'c'
-            dq .symbolD             ; case 'd'
+                              dq .symbolB             ; case 'b'
+                              dq .symbolC             ; case 'c'
+                              dq .symbolD             ; case 'd'
 
-            times ('n' - 'd') dq .differentSymbol           
+            times ('n' - 'd') dq .differentSymbol     ; TODO: change 'n' -> 'o' for better understanding            
                                                             
-            dq .symbolO             ; case 'o'              
+                              dq .symbolO             ; case 'o'              
                                                              
             times ('r' - 'o') dq .differentSymbol           
                                                             
-            dq .symbolS             ; case 's'              
+                              dq .symbolS             ; case 's'              
                                                             
             times ('w' - 's') dq .differentSymbol           
 
-            dq .symbolX             ; case 'x'
+                              dq .symbolX             ; case 'x'
 
 ;-----End of jump table---------------------------------------------------------
 
@@ -341,7 +342,7 @@ printNumBase2n:
 
 .continue:
 
-            call countBytes
+            call countBytesNumBase2n
             
             add rdi, rax    
 
@@ -425,7 +426,7 @@ printNumBase10:
             mov rax, r8
             xor r9, r9              ; for count bytes
 
-.countBytes:
+.countBytesNumBase10:
 
             xor rdx, rdx
             inc r9
@@ -433,7 +434,7 @@ printNumBase10:
 
             test eax, eax
 
-            jne .countBytes
+            jne .countBytesNumBase10
 
             add rdi, r9
 
@@ -484,7 +485,7 @@ printNumBase10:
 
 ;-----Start of countBytes label-------------------------------------------------
 
-countBytes:
+countBytesNumBase2n:                            ; TODO: use another buffer with string and then reverse
 
             xor rax, rax
             xor ch, ch

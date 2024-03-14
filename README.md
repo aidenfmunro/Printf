@@ -30,7 +30,7 @@ int main (void)
 
 ![screenshot](img/perftest.png)
 
-> **4x boost**
+> **4x boost FIXME PLEASE**
 
 ## Dependencies
 
