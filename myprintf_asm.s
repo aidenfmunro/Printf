@@ -2,8 +2,9 @@ global myPrintfC
 
 ;-----Start of constants--------------------------------------------------------
 
-EOL        equ 00
-BUFFER_LEN equ 264
+EOL          equ 00
+BUFFER_LEN   equ 264
+ADDRESS_SIZE equ 8
 
 ;-----End of constants----------------------------------------------------------
 
@@ -20,6 +21,22 @@ BUFFER_LEN equ 264
 %endmacro
 
 ;-----End of overflowCheck macro------------------------------------------------
+
+;-----Start of multipush macro--------------------------------------------------
+
+%macro  multipush 1-* 
+
+        %rep  %0
+
+        push    %1
+
+        %rotate 1
+
+        %endrep 
+
+%endmacro
+
+;-----End of multipush macro----------------------------------------------------
 
 section .bss
 
@@ -46,12 +63,7 @@ section .text
 myPrintfC:    
             pop r10                 ; save return address
 
-            push r9                 ; 
-            push r8                 ;
-            push rcx                ; arguments
-            push rdx                ;
-            push rsi                ;
-            push rdi                ;
+            multipush r9, r8, rcx, rdx, rsi, rdi
 
             push r10                ; put return address
 
@@ -74,7 +86,7 @@ myPrintfC:
 
 ;-------------------------------------------------------------------------------
 ;
-; [Brief]: printf realization
+; [Brief]: printf implementation
 ;
 ; [Expects]: rdi - format string, 
 ;            args: rsi, rdx, rcx, r8, r9,
@@ -133,11 +145,11 @@ myPrintf:
             ja .differentSymbol
 
             cmp al, 'b'             ; sym < b
-            jb .differentSymbol     
+            jb .differentSymbol     ; TODO: error handling and put rax 
 
             sub al, 'b'             ; get address number
 
-            mov rax, [.formatSpecifiers + rax * 8]    ; TODO: rax - 'b' instead of two commands
+            mov rax, [.formatSpecifiers + rax * ADDRESS_SIZE]    ; TODO: rax - 'b' instead of two commands
 
             jmp rax                 ; jump
 
@@ -151,21 +163,21 @@ myPrintf:
 
 .formatSpecifiers:
 
-                              dq .symbolB             ; case 'b'
-                              dq .symbolC             ; case 'c'
-                              dq .symbolD             ; case 'd'
+                                  dq .symbolB             ; case 'b'
+                                  dq .symbolC             ; case 'c'
+                                  dq .symbolD             ; case 'd'
 
-            times ('n' - 'd') dq .differentSymbol     ; TODO: change 'n' -> 'o' for better understanding            
+            times ('o' - 'd' - 1) dq .differentSymbol      
                                                             
-                              dq .symbolO             ; case 'o'              
+                                  dq .symbolO             ; case 'o'              
                                                              
-            times ('r' - 'o') dq .differentSymbol           
+            times ('s' - 'o' - 1) dq .differentSymbol           
                                                             
-                              dq .symbolS             ; case 's'              
+                                  dq .symbolS             ; case 's'              
                                                             
-            times ('w' - 's') dq .differentSymbol           
+            times ('x' - 's' - 1) dq .differentSymbol           
 
-                              dq .symbolX             ; case 'x'
+                                  dq .symbolX             ; case 'x'
 
 ;-----End of jump table---------------------------------------------------------
 
@@ -176,7 +188,7 @@ myPrintf:
 
             overflowCheck
 
-            mov al, [rbp + 16 + 8 * rbx]
+            mov al, [rbp + 16 + ADDRESS_SIZE * rbx]
 
             stosb
 
@@ -192,7 +204,7 @@ myPrintf:
 
             push rsi                ; save rsi
 
-            mov rsi, [rbp + 16 + 8 * rbx]
+            mov rsi, [rbp + 16 + ADDRESS_SIZE * rbx]
 
             call copy2Buffer
 
@@ -351,9 +363,11 @@ printNumBase2n:
 
             push rax
 
-            mov r8, 01b
+            mov r8, 01b                 ; bit mask
             shl r8, cl
             dec r8
+
+            cld                         ; fixed
 
 .loop:
 
@@ -365,12 +379,14 @@ printNumBase2n:
             shr edx, cl
 
             mov al, [hexTable + rax]  
-            mov [rdi], al
-            dec di
+            
+            stosb
 
             test edx, edx
 
             jne .loop
+
+            std
 
             pop rax
 
