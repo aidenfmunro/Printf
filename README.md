@@ -30,7 +30,7 @@ int main (void)
 
 ![screenshot](img/perftest.png)
 
-> **4x boost FIXME PLEASE**
+> **4x boost compared to standard printf**
 
 ## Dependencies
 
